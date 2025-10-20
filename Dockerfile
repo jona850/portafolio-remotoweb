@@ -21,6 +21,10 @@ WORKDIR /var/www/html
 # Copia todos los archivos de tu proyecto al contenedor
 COPY . .
 
+# Instala la extensión exif de PHP
+RUN docker-php-ext-install exif
+
+
 # Instala Composer (PHP) y dependencias del proyecto
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
