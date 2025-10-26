@@ -1,34 +1,29 @@
-# Usa una imagen oficial de PHP con Apache
-FROM php:8.2-apache
+# 1. Imagen base oficial de PHP con Composer y extensiones necesarias
+FROM php:8.2-fpm
 
-# Instala extensiones necesarias para Laravel
+# 2. Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    zip unzip git libpq-dev libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    git unzip libpng-dev libonig-dev libxml2-dev zip curl \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Habilita mod_rewrite de Apache (necesario para Laravel)
-RUN a2enmod rewrite
-
-# Copia los archivos de tu proyecto
-COPY . /var/www/html
-
-# Establece el directorio de trabajo
+# 3. Copiar archivos del proyecto
 WORKDIR /var/www/html
+COPY . .
 
-# Copia el archivo de configuración de Apache
-COPY ./docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-
-# Da permisos a storage y bootstrap/cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Instala Composer
+# 4. Instalar Composer (si no está)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Instala dependencias PHP del proyecto
+# 5. Instalar dependencias PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Expone el puerto 80
-EXPOSE 80
+# 6. Configurar permisos de almacenamiento y caché
+RUN chmod -R 777 storage bootstrap/cache
 
-# Comando para iniciar Apache
-CMD ["apache2-foreground"]
+# 7. Generar key de Laravel
+RUN php artisan key:generate
+
+# 8. Puerto expuesto
+EXPOSE 8000
+
+# 9. Comando de ejecución
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
