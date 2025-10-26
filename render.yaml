@@ -1,0 +1,44 @@
+# render.yaml
+
+services:
+  - type: web
+    name: portal-laravel
+    env: php
+    region: frankfurt # o la región que prefieras
+    buildCommand: "composer install --optimize-autoloader --no-dev && php artisan config:cache && php artisan route:cache && npm ci && npm run build"
+    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: mi-db-laravel
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: mi-db-laravel
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: mi-db-laravel
+          property: name
+      - key: DB_USERNAME
+        fromDatabase:
+          name: mi-db-laravel
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mi-db-laravel
+          property: password
+      - key: LOG_LEVEL
+        value: error
+
+databases:
+  - name: mi-db-laravel
+    databaseName: laravel_db
+    user: laravel_user
+    region: frankfurt
