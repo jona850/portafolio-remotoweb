@@ -20,7 +20,7 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chmod -R 777 storage bootstrap/cache
 
 # 7. Generar key de Laravel
-RUN php artisan key:generate
+#RUN php artisan key:generate
 
 # 8. Puerto expuesto
 EXPOSE 8000
